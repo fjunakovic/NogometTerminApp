@@ -1,0 +1,65 @@
+﻿@model NogometTerminApp.Models.TermRegisterViewModel
+
+@{
+    ViewData["Title"] = "Prijava na termin";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Prijava na termin</h1>
+    <h1 class="mb-0">Broj prijavljenih: @Model.CurrentCount / @Model.MaxPlayers</h1>
+</div>
+<br />
+<h3>Igramo 6 protiv 6, a mogu se prijaviti još dvoje da imamo zamjene.</h3>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="text-danger">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p>@error.ErrorMessage</p>
+        }
+    </div>
+}
+
+<form asp-action="Register" method="post">
+    <input type="hidden" asp-for="TermId" />
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label">Ime:</label>
+        <input asp-for="Name" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label">Email:</label>
+        <input asp-for="Email" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Prijavi se</button>
+</form>
+
+<hr />
+
+<h3>Popis prijavljenih:</h3>
+
+<form asp-action="Delete" method="post">
+    @Html.AntiForgeryToken()
+    <ol>
+        @for (int i = 0; i < Model.Registrations.Count; i++)
+        {
+            var reg = Model.Registrations[i];
+            var pozicija = i + 1;
+
+            <li class="d-flex align-items-center mb-1">
+                <button type="submit"
+                        name="registrationId"
+                        value="@reg.RegistrationId"
+                        class="btn btn-sm btn-danger me-2">
+                    Obriši
+                </button>
+
+                <span>@pozicija. @reg.PlayerName</span>
+            </li>
+        }
+    </ol>
+</form>
+

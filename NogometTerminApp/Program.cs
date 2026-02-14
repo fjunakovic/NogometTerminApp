@@ -1,3 +1,8 @@
+using Microsoft.EntityFrameworkCore;
+using System;
+using static System.Net.Mime.MediaTypeNames;
+using NogometTerminApp.Data;
+
 namespace NogometTerminApp
 {
     public class Program
@@ -9,6 +14,10 @@ namespace NogometTerminApp
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
+            builder.Services.AddDbContext<AppDbContext>(options => 
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnString")
+            ?? throw new InvalidOperationException("Connection string DefaultConnString not found.")));
+            
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
