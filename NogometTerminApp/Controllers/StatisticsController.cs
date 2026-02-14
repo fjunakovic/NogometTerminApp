@@ -41,5 +41,114 @@ namespace NogometTerminApp.Controllers
 
             return View(model);
         }
+        public async Task<IActionResult> Manage()
+        {
+            var terms = await _context.Terms
+                .Include(t => t.Registrations)
+                .ToListAsync();
+
+            var model = terms.Select(t => new TermStatisticsViewModel
+            {
+                TermId = t.Id,
+                TermDateTime = t.TermDateTime,
+                Location = t.Location,
+                MaxPlayers = t.MaxPlayers,
+                RegisteredCount = t.Registrations.Count,
+                IsPast = t.TermDateTime < DateTime.Now,
+                Result = t.Result
+            });
+
+            return View(model);
+        }
+        public async Task<IActionResult> Edit(int id)
+        {
+            var term = await _context.Terms
+                .Include(t => t.Registrations)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (term == null)
+            {
+                return NotFound();
+            }
+
+            var vm = new TermStatisticsViewModel
+            {
+                TermId = term.Id,
+                TermDateTime = term.TermDateTime,
+                Location = term.Location,
+                MaxPlayers = term.MaxPlayers,
+                RegisteredCount = term.Registrations.Count,
+                IsPast = term.TermDateTime < DateTime.Now,
+                Result = term.Result,
+                IsInEditMode = true
+            };
+
+            return View(vm);
+        }
+
+        public async Task<IActionResult> Delete(int id)
+        {
+            var term = await _context.Terms
+                .Include(t => t.Registrations)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (term == null)
+            {
+                return NotFound();
+            }
+
+            var vm = new TermStatisticsViewModel
+            {
+                TermId = term.Id,
+                TermDateTime = term.TermDateTime,
+                Location = term.Location,
+                RegisteredCount = term.Registrations.Count,
+                Result = term.Result
+            };
+
+            return View(vm);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(TermStatisticsViewModel vm)
+        {
+            // privremeno ignoriramo ModelState za ovu simple formu
+
+            var term = await _context.Terms.FindAsync(vm.TermId);
+            if (term == null)
+            {
+                return NotFound();
+            }
+
+            term.Result = vm.Result;
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Manage));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int termId)
+        {
+            var term = await _context.Terms
+                .Include(t => t.Registrations)
+                .FirstOrDefaultAsync(t => t.Id == termId);
+
+            if (term == null)
+            {
+                return NotFound();
+            }
+
+            _context.TermRegistrations.RemoveRange(term.Registrations);
+            _context.Terms.Remove(term);
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Manage));
+        }
+
     }
 }
