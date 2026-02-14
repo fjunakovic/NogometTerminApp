@@ -1,4 +1,7 @@
-﻿namespace NogometTerminApp.Models
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using NogometTerminApp.Data;
+
+namespace NogometTerminApp.Models
 {
     public class TermRegisterViewModel
     {
@@ -8,6 +11,8 @@
 
         public int CurrentCount { get; set; }
         public int MaxPlayers { get; set; }
-        public List<string> PlayerNames { get; set; }
+        
+        [ValidateNever]
+        public List<TermRegistrationInfo> Registrations { get; set; }
     }
 }

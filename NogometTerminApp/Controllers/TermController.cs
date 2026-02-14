@@ -35,17 +35,21 @@ namespace NogometTerminApp.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            var players = term.Registrations?
+            var registrations = term.Registrations?
                 .OrderBy(r => r.RegisteredAt)
-                .Select(r => r.Player.Name)
-                .ToList() ?? new List<string>();
+                .Select(r => new TermRegistrationInfo
+                {
+                    RegistrationId = r.Id,
+                    PlayerName = r.Player.Name
+                })
+                .ToList() ?? new List<TermRegistrationInfo>();
 
             var vm = new TermRegisterViewModel
             {
                 TermId = term.Id,
-                CurrentCount = players.Count,
+                CurrentCount = registrations.Count,
                 MaxPlayers = term.MaxPlayers,
-                PlayerNames = players
+                Registrations = registrations
             };
 
             return View(vm);
@@ -73,13 +77,19 @@ namespace NogometTerminApp.Controllers
 
             if (!ModelState.IsValid)
             {
-                model.CurrentCount = currentCount;
-                model.MaxPlayers = term.MaxPlayers;
-                model.PlayerNames = term.Registrations
+                var registrations = term.Registrations
                     .OrderBy(r => r.RegisteredAt)
-                    .Select(r => r.Player.Name)
+                    .Select(r => new TermRegistrationInfo
+                    {
+                        RegistrationId = r.Id,
+                        PlayerName = r.Player.Name
+                    })
                     .ToList();
 
+                model.CurrentCount = registrations.Count;
+                model.MaxPlayers = term.MaxPlayers;
+                model.Registrations = registrations;
+          
                 return View("Index", model);
             }
 
@@ -106,6 +116,21 @@ namespace NogometTerminApp.Controllers
 
             _context.TermRegistrations.Add(registration);
             await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index");
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int registrationId)
+        {
+            var registration = await _context.TermRegistrations
+                .FirstOrDefaultAsync(r => r.Id == registrationId);
+
+            if (registration != null)
+            {
+                _context.TermRegistrations.Remove(registration);
+                await _context.SaveChangesAsync();
+            }
 
             return RedirectToAction("Index");
         }
