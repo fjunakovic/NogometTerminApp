@@ -18,7 +18,6 @@ namespace NogometTerminApp.Controllers
             _context = context;
         }
 
-        // GET: /Statistics/Index
         public async Task<IActionResult> Index()
         {
             var now = DateTime.Now;
@@ -36,44 +35,11 @@ namespace NogometTerminApp.Controllers
                 Location = t.Location,
                 MaxPlayers = t.MaxPlayers,
                 RegisteredCount = t.Registrations.Count,
+                Result = t.Result,
                 IsPast = t.TermDateTime < now
             }).ToList();
 
             return View(model);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteTerms(int[] termIds)
-        {
-            if (termIds == null || termIds.Length == 0)
-            {
-                return RedirectToAction("Index");
-            }
-
-            // obriši prijave za sve označene termine
-            var registrations = await _context.TermRegistrations
-                .Where(r => termIds.Contains(r.TermId))
-                .ToListAsync();
-
-            if (registrations.Any())
-            {
-                _context.TermRegistrations.RemoveRange(registrations);
-            }
-
-            // obriši same termine
-            var terms = await _context.Terms
-                .Where(t => termIds.Contains(t.Id))
-                .ToListAsync();
-
-            if (terms.Any())
-            {
-                _context.Terms.RemoveRange(terms);
-            }
-
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction("Index");
         }
     }
 }

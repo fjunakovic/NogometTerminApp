@@ -8,5 +8,7 @@
         public int MaxPlayers { get; set; }
 
         public ICollection<TermRegistration> Registrations { get; set; }
+
+        public string Result { get; set; }
     }
 }

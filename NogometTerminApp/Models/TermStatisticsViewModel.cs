@@ -10,5 +10,7 @@ namespace NogometTerminApp.Models
         public int MaxPlayers { get; set; }
         public int RegisteredCount { get; set; }
         public bool IsPast { get; set; }
+        public string Result { get; set; }
+        public bool IsInEditMode { get; set; }
     }
 }

@@ -6,46 +6,26 @@
 
 <h1>Statistika termina</h1>
 
-<form asp-action="DeleteTerms"
-      asp-controller="Statistics"
-      method="post"
-      onsubmit="return confirm('Obrisati označene termine?');">
-
-    @Html.AntiForgeryToken()
-
-    <div class="mb-2">
-        <button type="submit" class="btn btn-danger">
-            Obriši označene termine
-        </button>
-    </div>
-
-    <table class="table table-striped">
-        <thead>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Datum i vrijeme</th>
+            <th>Lokacija</th>
+            <th>Prijavljeni</th>
+            <th>Rezultat</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var term in Model)
+        {
             <tr>
-                <th></th>
-                <th>Datum i vrijeme</th>
-                <th>Lokacija</th>
-                <th>Prijavljeni</th>
-                <th>Maksimalno</th>
-                <th>Status</th>
+                <td>@term.TermDateTime.ToString("dd.MM.yyyy. HH:mm")</td>
+                <td>@term.Location</td>
+                <td>@term.RegisteredCount</td>
+                <td>@term.Result</td>
+                <td>@(term.IsPast ? "Održan" : "Nadolazeći")</td>
             </tr>
-        </thead>
-        <tbody>
-            @foreach (var term in Model)
-            {
-                <tr>
-                    <td>
-                        <input type="checkbox"
-                               name="termIds"
-                               value="@term.TermId" />
-                    </td>
-                    <td>@term.TermDateTime.ToString("dd.MM.yyyy. HH:mm")</td>
-                    <td>@term.Location</td>
-                    <td>@term.RegisteredCount</td>
-                    <td>@term.MaxPlayers</td>
-                    <td>@(term.IsPast ? "Održan" : "Nadolazeći")</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</form>
+        }
+    </tbody>
+</table>

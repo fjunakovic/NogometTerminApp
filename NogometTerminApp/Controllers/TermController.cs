@@ -59,6 +59,16 @@ namespace NogometTerminApp.Controllers
 
             return View(vm);
         }
+        public async Task<IActionResult> Edit(int id)
+        {
+            var term = await _context.Terms.FindAsync(id);
+            if (term == null)
+            {
+                return NotFound();
+            }
+            return View(term);
+        }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -158,6 +168,26 @@ namespace NogometTerminApp.Controllers
 
             var saturday = today.AddDays(daysUntilSaturday);
             return saturday.AddHours(20);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Term term)
+        {
+            if (id != term.Id)
+            {
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(term);
+            }
+
+            _context.Update(term);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index)); // ili "Index" u Statistics
         }
     }
 }
