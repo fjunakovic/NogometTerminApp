@@ -1,0 +1,37 @@
+﻿@model IEnumerable<NogometTerminApp.Models.TermStatisticsViewModel>
+
+@{
+    ViewData["Title"] = "Statistika termina";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+<h1>Statistika termina</h1>
+<a asp-action="Manage"
+   asp-controller="Statistics"
+   class="btn btn-primary mb-3">
+    Upravljaj terminima
+</a>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Datum i vrijeme</th>
+            <th>Lokacija</th>
+            <th>Prijavljeni</th>
+            <th>Rezultat</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var term in Model)
+        {
+            <tr>
+                <td>@term.TermDateTime.ToString("dd.MM.yyyy. HH:mm")</td>
+                <td>@term.Location</td>
+                <td>@term.RegisteredCount</td>
+                <td>@term.Result</td>
+                <td>@(term.IsPast ? "Održan" : "Nadolazeći")</td>
+            </tr>
+        }
+    </tbody>
+</table>

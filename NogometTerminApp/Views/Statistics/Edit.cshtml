@@ -1,0 +1,28 @@
+﻿@model NogometTerminApp.Models.TermStatisticsViewModel
+
+@{
+    ViewData["Title"] = "Uredi rezultat";
+}
+
+<h1>Uredi rezultat</h1>
+
+<form asp-action="Edit" method="post">
+
+    <input type="hidden" asp-for="TermId" />
+
+    <div class="mb-3">
+        <label class="form-label">Termin</label>
+        <input class="form-control"
+               value="@Model.TermDateTime.ToString("dd.MM.yyyy. HH:mm") - @Model.Location"
+               disabled />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Rezultat</label>
+        <input asp-for="Result" class="form-control" />
+        <span asp-validation-for="Result" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Spremi</button>
+    <a asp-action="Manage" class="btn btn-secondary">Natrag</a>
+</form>

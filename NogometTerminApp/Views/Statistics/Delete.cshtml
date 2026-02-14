@@ -1,0 +1,25 @@
+﻿@model NogometTerminApp.Models.TermStatisticsViewModel
+
+@{
+    ViewData["Title"] = "Potvrda brisanja";
+}
+
+<h1>Obriši termin</h1>
+
+<p>Jesi siguran da želiš obrisati ovaj termin?</p>
+
+<ul>
+    <li><strong>Datum i vrijeme:</strong> @Model.TermDateTime.ToString("dd.MM.yyyy. HH:mm")</li>
+    <li><strong>Lokacija:</strong> @Model.Location</li>
+    <li><strong>Prijavljeni:</strong> @Model.RegisteredCount</li>
+    <li><strong>Rezultat:</strong> @Model.Result</li>
+</ul>
+
+<form asp-action="DeleteConfirmed" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="termId" value="@Model.TermId" />
+
+    <button type="submit" class="btn btn-danger">Da, obriši</button>
+    <a asp-action="Manage" class="btn btn-secondary">Odustani</a>
+</form>
+

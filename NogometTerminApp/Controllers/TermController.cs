@@ -2,6 +2,10 @@
 using Microsoft.EntityFrameworkCore;
 using NogometTerminApp.Data;
 using NogometTerminApp.Models;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace NogometTerminApp.Controllers
 {
@@ -14,23 +18,24 @@ namespace NogometTerminApp.Controllers
             _context = context;
         }
 
-        // za sada jedan fiksni termin s Id = 1
         public async Task<IActionResult> Index()
         {
+            var termDateTime = GetCurrentSaturday20();
+
             var term = await _context.Terms
                 .Include(t => t.Registrations)
                 .ThenInclude(r => r.Player)
-                .FirstOrDefaultAsync(t => t.Id == 1);
+                .FirstOrDefaultAsync(t => t.TermDateTime == termDateTime);
 
             if (term == null)
             {
-                // ako ga nema, kreiramo ga prvi put
                 term = new Term
                 {
-                    TermDateTime = DateTime.Today.AddHours(20),
-                    Location = "Zagreb - dvorana",
+                    TermDateTime = termDateTime,
+                    Location = "Zagreb - ŠD Hotanj",
                     MaxPlayers = 14
                 };
+
                 _context.Terms.Add(term);
                 await _context.SaveChangesAsync();
             }
@@ -54,8 +59,19 @@ namespace NogometTerminApp.Controllers
 
             return View(vm);
         }
+        public async Task<IActionResult> Edit(int id)
+        {
+            var term = await _context.Terms.FindAsync(id);
+            if (term == null)
+            {
+                return NotFound();
+            }
+            return View(term);
+        }
+
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(TermRegisterViewModel model)
         {
             var term = await _context.Terms
@@ -89,7 +105,7 @@ namespace NogometTerminApp.Controllers
                 model.CurrentCount = registrations.Count;
                 model.MaxPlayers = term.MaxPlayers;
                 model.Registrations = registrations;
-          
+
                 return View("Index", model);
             }
 
@@ -119,6 +135,8 @@ namespace NogometTerminApp.Controllers
 
             return RedirectToAction("Index");
         }
+
+   
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int registrationId)
@@ -133,6 +151,50 @@ namespace NogometTerminApp.Controllers
             }
 
             return RedirectToAction("Index");
+        }
+
+
+        private DateTime GetCurrentSaturday20()
+        {
+            var now = DateTime.Now;
+            int todayDow = (int)now.DayOfWeek;
+            int targetDow = (int)DayOfWeek.Saturday;
+
+            int daysUntilSaturday = targetDow - todayDow;
+            if (daysUntilSaturday < 0)
+            {
+                daysUntilSaturday += 7;
+            }
+
+            var saturday = now.Date.AddDays(daysUntilSaturday);
+            var thisSaturday20 = saturday.AddHours(20);
+
+            if (now > thisSaturday20)
+            {
+                thisSaturday20 = thisSaturday20.AddDays(7);
+            }
+
+            return thisSaturday20;
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Term term)
+        {
+            if (id != term.Id)
+            {
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(term);
+            }
+
+            _context.Update(term);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index)); // ili "Index" u Statistics
         }
     }
 }
