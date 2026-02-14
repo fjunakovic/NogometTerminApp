@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NogometTerminApp.Data;
 
 namespace NogometTerminApp.Data
 {
