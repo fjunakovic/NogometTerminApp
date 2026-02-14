@@ -43,8 +43,11 @@ namespace NogometTerminApp.Controllers
         }
         public async Task<IActionResult> Manage()
         {
+            var now = DateTime.Now;
+
             var terms = await _context.Terms
                 .Include(t => t.Registrations)
+                .OrderByDescending(t => t.TermDateTime)
                 .ToListAsync();
 
             var model = terms.Select(t => new TermStatisticsViewModel
@@ -54,7 +57,7 @@ namespace NogometTerminApp.Controllers
                 Location = t.Location,
                 MaxPlayers = t.MaxPlayers,
                 RegisteredCount = t.Registrations.Count,
-                IsPast = t.TermDateTime < DateTime.Now,
+                IsPast = t.TermDateTime < now,
                 Result = t.Result
             });
 

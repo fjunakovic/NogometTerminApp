@@ -156,8 +156,8 @@ namespace NogometTerminApp.Controllers
 
         private DateTime GetCurrentSaturday20()
         {
-            var today = DateTime.Today;
-            int todayDow = (int)today.DayOfWeek;      
+            var now = DateTime.Now;
+            int todayDow = (int)now.DayOfWeek;
             int targetDow = (int)DayOfWeek.Saturday;
 
             int daysUntilSaturday = targetDow - todayDow;
@@ -166,8 +166,15 @@ namespace NogometTerminApp.Controllers
                 daysUntilSaturday += 7;
             }
 
-            var saturday = today.AddDays(daysUntilSaturday);
-            return saturday.AddHours(20);
+            var saturday = now.Date.AddDays(daysUntilSaturday);
+            var thisSaturday20 = saturday.AddHours(20);
+
+            if (now > thisSaturday20)
+            {
+                thisSaturday20 = thisSaturday20.AddDays(7);
+            }
+
+            return thisSaturday20;
         }
 
         [HttpPost]
