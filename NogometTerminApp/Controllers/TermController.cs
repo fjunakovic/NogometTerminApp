@@ -1,21 +1,25 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NogometTerminApp.Data;
 using NogometTerminApp.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace NogometTerminApp.Controllers
 {
     public class TermController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public TermController(AppDbContext context)
+        public TermController(AppDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         public async Task<IActionResult> Index()
@@ -45,7 +49,8 @@ namespace NogometTerminApp.Controllers
                 .Select(r => new TermRegistrationInfo
                 {
                     RegistrationId = r.Id,
-                    PlayerName = r.Player.Name
+                    PlayerName = r.Player.Name,
+                    Team = r.Team
                 })
                 .ToList() ?? new List<TermRegistrationInfo>();
 
@@ -56,6 +61,20 @@ namespace NogometTerminApp.Controllers
                 MaxPlayers = term.MaxPlayers,
                 Registrations = registrations
             };
+
+            if (User.Identity.IsAuthenticated)
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user != null)
+                {
+                    var player = await _context.Players.FirstOrDefaultAsync(p => p.UserId == user.Id);
+                    if (player != null)
+                    {
+                        vm.IsCurrentUserRegistered = term.Registrations
+                            .Any(r => r.PlayerId == player.Id);
+                    }
+                }
+            }
 
             return View(vm);
         }
@@ -72,6 +91,7 @@ namespace NogometTerminApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Register(TermRegisterViewModel model)
         {
             var term = await _context.Terms
@@ -89,6 +109,12 @@ namespace NogometTerminApp.Controllers
             if (currentCount >= term.MaxPlayers)
             {
                 ModelState.AddModelError(string.Empty, "Termin je pun (maksimalno 14 igrača).");
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "Moraš biti prijavljen da bi se prijavio na termin.");
             }
 
             if (!ModelState.IsValid)
@@ -110,35 +136,71 @@ namespace NogometTerminApp.Controllers
             }
 
             var player = await _context.Players
-                .FirstOrDefaultAsync(p => p.Email == model.Email);
+                .FirstOrDefaultAsync(p => p.UserId == user.Id);
 
             if (player == null)
             {
                 player = new Player
                 {
-                    Name = model.Name,
-                    Email = model.Email
+                    Name = user.FirstName,
+                    UserId = user.Id
                 };
                 _context.Players.Add(player);
                 await _context.SaveChangesAsync();
             }
 
-            var registration = new TermRegistration
+            bool alreadyRegistered = term.Registrations.Any(r => r.PlayerId == player.Id);
+            if (!alreadyRegistered)
             {
-                TermId = term.Id,
-                PlayerId = player.Id,
-                RegisteredAt = DateTime.Now
-            };
+                var registration = new TermRegistration
+                {
+                    TermId = term.Id,
+                    PlayerId = player.Id,
+                    RegisteredAt = DateTime.Now
+                };
 
-            _context.TermRegistrations.Add(registration);
-            await _context.SaveChangesAsync();
+                _context.TermRegistrations.Add(registration);
+                await _context.SaveChangesAsync();
+            }
 
             return RedirectToAction("Index");
         }
 
-   
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> Unregister(TermRegisterViewModel model)
+        {
+            var term = await _context.Terms
+                .Include(t => t.Registrations)
+                .FirstOrDefaultAsync(t => t.Id == model.TermId);
+
+            if (term == null)
+                return NotFound();
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return Challenge();
+
+            var player = await _context.Players.FirstOrDefaultAsync(p => p.UserId == user.Id);
+            if (player == null)
+                return RedirectToAction("Index");
+
+            var registration = await _context.TermRegistrations
+                .FirstOrDefaultAsync(r => r.TermId == term.Id && r.PlayerId == player.Id);
+
+            if (registration != null)
+            {
+                _context.TermRegistrations.Remove(registration);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int registrationId)
         {
             var registration = await _context.TermRegistrations
@@ -179,6 +241,7 @@ namespace NogometTerminApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, Term term)
         {
             if (id != term.Id)
@@ -194,7 +257,31 @@ namespace NogometTerminApp.Controllers
             _context.Update(term);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index)); // ili "Index" u Statistics
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ChangeTeam(int registrationId, string team)
+        {
+            var registration = await _context.TermRegistrations
+                .FirstOrDefaultAsync(r => r.Id == registrationId);
+
+            if (registration == null)
+            {
+                return NotFound();
+            }
+
+            if (team != "Bijeli" && team != "Tamni" && !string.IsNullOrEmpty(team))
+            {
+                return BadRequest();
+            }
+
+            registration.Team = string.IsNullOrEmpty(team) ? null : team;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index");
         }
     }
 }

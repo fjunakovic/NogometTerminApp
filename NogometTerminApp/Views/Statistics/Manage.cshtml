@@ -8,29 +8,72 @@
 
 <table class="table table-striped">
     <thead>
-        <tr>
+        <tr class="text-center">
             <th>Datum i vrijeme</th>
             <th>Lokacija</th>
             <th>Prijavljeni</th>
             <th>Rezultat</th>
+            <th>Status</th>
             <th>Akcije</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var term in Model)
         {
-            <tr>
+            <tr class ="text-center">
                 <td>@term.TermDateTime.ToString("dd.MM.yyyy. HH:mm")</td>
                 <td>@term.Location</td>
                 <td>@term.RegisteredCount</td>
                 <td>@term.Result</td>
                 <td>
-                    <a asp-action="Edit"
-                       asp-controller="Statistics"
-                       asp-route-id="@term.TermId"
-                       class="btn btn-sm btn-primary">
-                        Uredi rezultat
-                    </a>
+                    @if (term.IsPostponed)
+                    {
+                        <span class="text-warning">Odgođen</span>
+                    }
+                    else if (term.IsPast)
+                    {
+                        <span class="text-muted">Održan</span>
+                    }
+                    else
+                    {
+                        <span>Aktivan</span>
+                    }
+                </td>
+                <td>
+                    @if (!term.IsPostponed)
+                    {
+                        <a asp-action="Edit"
+                           asp-controller="Statistics"
+                           asp-route-id="@term.TermId"
+                           class="btn btn-sm btn-primary">
+                            Uredi rezultat
+                        </a>
+                    }
+
+                    @if (!term.IsPostponed)
+                    {
+                        <form asp-action="Postpone"
+                              asp-controller="Statistics"
+                              method="post"
+                              style="display:inline">
+                            <input type="hidden" name="id" value="@term.TermId" />
+                            <button type="submit" class="btn btn-sm btn-warning">
+                                Odgođen
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="UnPostpone"
+                              asp-controller="Statistics"
+                              method="post"
+                              style="display:inline">
+                            <input type="hidden" name="id" value="@term.TermId" />
+                            <button type="submit" class="btn btn-sm btn-secondary">
+                                Održan
+                            </button>
+                        </form>
+                    }
 
                     <a asp-action="Delete"
                        asp-controller="Statistics"

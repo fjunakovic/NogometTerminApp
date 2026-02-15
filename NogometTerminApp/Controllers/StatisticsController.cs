@@ -1,14 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NogometTerminApp.Data;
 using NogometTerminApp.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace NogometTerminApp.Controllers
 {
+    [Authorize]
     public class StatisticsController : Controller
     {
         private readonly AppDbContext _context;
@@ -18,6 +20,7 @@ namespace NogometTerminApp.Controllers
             _context = context;
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             var now = DateTime.Now;
@@ -36,11 +39,14 @@ namespace NogometTerminApp.Controllers
                 MaxPlayers = t.MaxPlayers,
                 RegisteredCount = t.Registrations.Count,
                 Result = t.Result,
-                IsPast = t.TermDateTime < now
+                IsPast = t.TermDateTime < now,
+                IsPostponed = t.IsPostponed
             }).ToList();
 
             return View(model);
         }
+
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Manage()
         {
             var now = DateTime.Now;
@@ -58,11 +64,14 @@ namespace NogometTerminApp.Controllers
                 MaxPlayers = t.MaxPlayers,
                 RegisteredCount = t.Registrations.Count,
                 IsPast = t.TermDateTime < now,
-                Result = t.Result
+                Result = t.Result,
+                IsPostponed = t.IsPostponed
             });
 
             return View(model);
         }
+
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id)
         {
             var term = await _context.Terms
@@ -83,12 +92,14 @@ namespace NogometTerminApp.Controllers
                 RegisteredCount = term.Registrations.Count,
                 IsPast = term.TermDateTime < DateTime.Now,
                 Result = term.Result,
-                IsInEditMode = true
+                IsInEditMode = true,
+                IsPostponed = term.IsPostponed
             };
 
             return View(vm);
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var term = await _context.Terms
@@ -115,9 +126,9 @@ namespace NogometTerminApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(TermStatisticsViewModel vm)
         {
-            // privremeno ignoriramo ModelState za ovu simple formu
 
             var term = await _context.Terms.FindAsync(vm.TermId);
             if (term == null)
@@ -126,6 +137,7 @@ namespace NogometTerminApp.Controllers
             }
 
             term.Result = vm.Result;
+            term.IsPostponed = vm.IsPostponed;
 
             await _context.SaveChangesAsync();
 
@@ -134,6 +146,7 @@ namespace NogometTerminApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int termId)
         {
             var term = await _context.Terms
@@ -148,6 +161,40 @@ namespace NogometTerminApp.Controllers
             _context.TermRegistrations.RemoveRange(term.Registrations);
             _context.Terms.Remove(term);
 
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Manage));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Postpone(int id)
+        {
+            var term = await _context.Terms.FindAsync(id);
+            if (term == null)
+            {
+                return NotFound();
+            }
+
+            term.IsPostponed = true;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Manage));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UnPostpone(int id)
+        {
+            var term = await _context.Terms.FindAsync(id);
+            if (term == null)
+            {
+                return NotFound();
+            }
+
+            term.IsPostponed = false;
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Manage));

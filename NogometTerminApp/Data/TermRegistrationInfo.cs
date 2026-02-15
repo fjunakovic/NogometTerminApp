@@ -4,5 +4,6 @@
     {
         public int RegistrationId { get; set; }
         public string PlayerName { get; set; }
+        public string? Team { get; set; }
     }
 }

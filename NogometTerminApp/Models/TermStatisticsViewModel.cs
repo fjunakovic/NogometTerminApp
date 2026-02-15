@@ -12,5 +12,6 @@ namespace NogometTerminApp.Models
         public bool IsPast { get; set; }
         public string Result { get; set; }
         public bool IsInEditMode { get; set; }
+        public bool IsPostponed { get; set; }
     }
 }
