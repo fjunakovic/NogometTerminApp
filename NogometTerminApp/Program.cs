@@ -32,6 +32,12 @@ namespace NogometTerminApp
 
             var app = builder.Build();
 
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                NogometTerminApp.Data.AdminCreate.SeedAsync(services).GetAwaiter().GetResult();
+            }
+
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
