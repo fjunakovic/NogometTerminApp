@@ -36,7 +36,8 @@ namespace NogometTerminApp.Controllers
                 MaxPlayers = t.MaxPlayers,
                 RegisteredCount = t.Registrations.Count,
                 Result = t.Result,
-                IsPast = t.TermDateTime < now
+                IsPast = t.TermDateTime < now,
+                IsPostponed = t.IsPostponed
             }).ToList();
 
             return View(model);
@@ -58,7 +59,8 @@ namespace NogometTerminApp.Controllers
                 MaxPlayers = t.MaxPlayers,
                 RegisteredCount = t.Registrations.Count,
                 IsPast = t.TermDateTime < now,
-                Result = t.Result
+                Result = t.Result,
+                IsPostponed = t.IsPostponed
             });
 
             return View(model);
@@ -83,7 +85,8 @@ namespace NogometTerminApp.Controllers
                 RegisteredCount = term.Registrations.Count,
                 IsPast = term.TermDateTime < DateTime.Now,
                 Result = term.Result,
-                IsInEditMode = true
+                IsInEditMode = true,
+                IsPostponed = term.IsPostponed
             };
 
             return View(vm);
@@ -126,6 +129,7 @@ namespace NogometTerminApp.Controllers
             }
 
             term.Result = vm.Result;
+            term.IsPostponed = vm.IsPostponed;
 
             await _context.SaveChangesAsync();
 
@@ -148,6 +152,38 @@ namespace NogometTerminApp.Controllers
             _context.TermRegistrations.RemoveRange(term.Registrations);
             _context.Terms.Remove(term);
 
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Manage));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Postpone(int id)
+        {
+            var term = await _context.Terms.FindAsync(id);
+            if (term == null)
+            {
+                return NotFound();
+            }
+
+            term.IsPostponed = true;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Manage));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UnPostpone(int id)
+        {
+            var term = await _context.Terms.FindAsync(id);
+            if (term == null)
+            {
+                return NotFound();
+            }
+
+            term.IsPostponed = false;
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Manage));

@@ -25,12 +25,26 @@
     <tbody>
         @foreach (var term in Model)
         {
-            <tr>
+            <tr class="@(term.IsPostponed ? "bg-danger text-white" : "")">
                 <td>@term.TermDateTime.ToString("dd.MM.yyyy. HH:mm")</td>
                 <td>@term.Location</td>
                 <td>@term.RegisteredCount</td>
                 <td>@term.Result</td>
-                <td>@(term.IsPast ? "Održan" : "Nadolazeći")</td>
+                @*<td>@(term.IsPast ? "Održan" : "Nadolazeći")</td>*@
+                <td>
+                    @if (term.IsPostponed)
+                    {
+                        @:Odgođen
+                    }
+                    else if (term.IsPast)
+                    {
+                        @:Održan
+                    }
+                    else
+                    {
+                        @:Nadolazeći
+                    }
+                </td>
             </tr>
         }
     </tbody>

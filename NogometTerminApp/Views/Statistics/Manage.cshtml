@@ -25,6 +25,20 @@
                 <td>@term.RegisteredCount</td>
                 <td>@term.Result</td>
                 <td>
+                    @if (term.IsPostponed)
+                    {
+                        <span class="text-warning">Odgođen</span>
+                    }
+                    else if (term.IsPast)
+                    {
+                        <span class="text-muted">Održan</span>
+                    }
+                    else
+                    {
+                        <span>Aktivan</span>
+                    }
+                </td>
+                <td>
                     <a asp-action="Edit"
                        asp-controller="Statistics"
                        asp-route-id="@term.TermId"
@@ -38,6 +52,30 @@
                        class="btn btn-sm btn-danger">
                         Obriši
                     </a>
+                    @if (!term.IsPostponed)
+                    {
+                        <form asp-action="Postpone"
+                              asp-controller="Statistics"
+                              method="post"
+                              style="display:inline">
+                            <input type="hidden" name="id" value="@term.TermId" />
+                            <button type="submit" class="btn btn-sm btn-warning">
+                                Odgođen
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="UnPostpone"
+                              asp-controller="Statistics"
+                              method="post"
+                              style="display:inline">
+                            <input type="hidden" name="id" value="@term.TermId" />
+                            <button type="submit" class="btn btn-sm btn-secondary">
+                                Održan
+                            </button>
+                        </form>
+                    }
                 </td>
             </tr>
         }
