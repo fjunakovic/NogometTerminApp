@@ -7,5 +7,8 @@
         public string Email { get; set; }
 
         public ICollection<TermRegistration> TermRegistrations { get; set; }
+
+        public string UserId { get; set; }
+        public ApplicationUser User { get; set; }
     }
 }

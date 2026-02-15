@@ -1,7 +1,10 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using NogometTerminApp.Data;
+using NogometTerminApp.Services;
 using System;
 using static System.Net.Mime.MediaTypeNames;
-using NogometTerminApp.Data;
 
 namespace NogometTerminApp
 {
@@ -12,12 +15,21 @@ namespace NogometTerminApp
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnString")
+                ?? throw new InvalidOperationException("Connection string DefaultConnString not found.")));
+
+
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddDefaultTokenProviders();
+
+            builder.Services.AddTransient<IEmailSender, EmailSender>();
+
             builder.Services.AddControllersWithViews();
 
-            builder.Services.AddDbContext<AppDbContext>(options => 
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnString")
-            ?? throw new InvalidOperationException("Connection string DefaultConnString not found.")));
-            
+            builder.Services.AddRazorPages();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -33,13 +45,18 @@ namespace NogometTerminApp
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
+            app.MapRazorPages();
+
             app.Run();
+
+
         }
     }
 }
