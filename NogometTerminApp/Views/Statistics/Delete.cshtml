@@ -4,22 +4,45 @@
     ViewData["Title"] = "Potvrda brisanja";
 }
 
-<h1>Obriši termin</h1>
+<div class="card shadow-sm card-termin mt-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 text-danger">Obriši termin</h5>
+        <a asp-action="Manage" class="btn btn-sm btn-outline-light text-primary bg-white">
+            Natrag na upravljanje
+        </a>
+    </div>
 
-<p>Jesi siguran da želiš obrisati ovaj termin?</p>
+    <div class="card-body">
+        <div class="alert alert-warning">
+            Jesi siguran da želiš obrisati ovaj termin? Ova radnja se ne može poništiti.
+        </div>
 
-<ul>
-    <li><strong>Datum i vrijeme:</strong> @Model.TermDateTime.ToString("dd.MM.yyyy. HH:mm")</li>
-    <li><strong>Lokacija:</strong> @Model.Location</li>
-    <li><strong>Prijavljeni:</strong> @Model.RegisteredCount</li>
-    <li><strong>Rezultat:</strong> @Model.Result</li>
-</ul>
+        <dl class="row">
+            <dt class="col-sm-3">Datum i vrijeme</dt>
+            <dd class="col-sm-9">@Model.TermDateTime.ToString("dd.MM.yyyy. HH:mm")</dd>
 
-<form asp-action="DeleteConfirmed" method="post">
-    @Html.AntiForgeryToken()
-    <input type="hidden" name="termId" value="@Model.TermId" />
+            <dt class="col-sm-3">Lokacija</dt>
+            <dd class="col-sm-9">@Model.Location</dd>
 
-    <button type="submit" class="btn btn-danger">Da, obriši</button>
-    <a asp-action="Manage" class="btn btn-secondary">Odustani</a>
-</form>
+            <dt class="col-sm-3">Prijavljeni</dt>
+            <dd class="col-sm-9">@Model.RegisteredCount</dd>
 
+            <dt class="col-sm-3">Rezultat</dt>
+            <dd class="col-sm-9">@Model.Result</dd>
+        </dl>
+
+        <form asp-action="DeleteConfirmed" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="termId" value="@Model.TermId" />
+
+            <div class="d-flex justify-content-end gap-2 mt-3">
+                <a asp-action="Manage" class="btn btn-secondary">
+                    Odustani
+                </a>
+                <button type="submit" class="btn btn-danger">
+                    Da, obriši termin
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

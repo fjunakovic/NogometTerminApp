@@ -4,107 +4,135 @@
     ViewData["Title"] = "Prijava na termin";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="mb-0">Prijava na termin</h1>
-    <h1 class="mb-0">Broj prijavljenih: @Model.CurrentCount / @Model.MaxPlayers</h1>
-</div>
-<br />
-<h3>Igramo 6 protiv 6, a mogu se prijaviti još dvoje da imamo zamjene.</h3>
+<div class="container mt-4">
+    <div class="card shadow-sm card-termin mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0">Prijava na termin</h5>
+                <small class="text-muted">
+                    Igramo 6 protiv 6, a mogu se prijaviti još dvoje da imamo zamjene.
+                </small>
+            </div>
+            <span class="badge bg-primary fs-6">
+                Prijavljeni: @Model.CurrentCount / @Model.MaxPlayers
+            </span>
+        </div>
 
-@if (!ViewData.ModelState.IsValid)
-{
-    <div class="text-danger">
-        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-        {
-            <p>@error.ErrorMessage</p>
-        }
-    </div>
-}
-
-@if (User.Identity.IsAuthenticated)
-{
-    <form asp-action="@(Model.IsCurrentUserRegistered ? "Unregister" : "Register")" method="post">
-        @Html.AntiForgeryToken()
-        <input type="hidden" asp-for="TermId" />
-
-        @if (Model.IsCurrentUserRegistered)
-        {
-            <button type="submit" class="btn btn-warning">Odjavi se</button>
-        }
-        else
-        {
-            <button type="submit" class="btn btn-primary">Prijavi se</button>
-        }
-    </form>
-}
-else
-{
-    <h3>Za prijavu na termin moraš biti prijavljen.</h3>
-}
-
-<div class="row">
-    <div class="col-md-6">
-        <h3 class="text-center">Popis prijavljenih:</h3>
-
-        <ul>
-            @for (int i = 0; i < Model.Registrations.Count; i++)
+        <div class="card-body">
+            @if (!ViewData.ModelState.IsValid)
             {
-                var reg = Model.Registrations[i];
-                var pozicija = i + 1;
-
-                <div class="mb-1">
-                    <form method="post" class="d-inline">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="registrationId" value="@reg.RegistrationId" />
-
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <button type="submit"
-                                    formaction="@Url.Action("Delete", "Term")"
-                                    class="btn btn-sm btn-danger me-2">
-                                Obriši
-                            </button>
-
-                            <button type="submit"
-                                    formaction='@Url.Action("ChangeTeam", "Term", new { team = "Bijeli" })'
-                                    class="btn btn-sm btn-light me-1">
-                                Bijeli
-                            </button>
-
-                            <button type="submit"
-                                    formaction='@Url.Action("ChangeTeam", "Term", new { team = "Tamni" })'
-                                    class="btn btn-sm btn-dark text-white me-2">
-                                Tamni
-                            </button>
-                        }
-
-                        <span>@pozicija. @reg.PlayerName</span>
-                    </form>
+                <div class="alert alert-danger">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <div>@error.ErrorMessage</div>
+                    }
                 </div>
             }
-        </ul>
-    </div>
 
-    <div class="col-md-6">
-        <h3 class="text-center">Timovi:</h3>
-
-        <div class="d-flex justify-content-center text-center">
-            <div class="me-4">
-                <h4 class="mb-2">Bijeli:</h4>
-                @foreach (var p in Model.WhiteTeam)
+            <div class="mb-4">
+                @if (User.Identity.IsAuthenticated)
                 {
-                    <div class="border rounded py-1 my-1 px-3">@p.PlayerName</div>
+                    <form asp-action="@(Model.IsCurrentUserRegistered ? "Unregister" : "Register")"
+                          method="post"
+                          class="d-flex gap-2 align-items-center">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="TermId" />
+
+                        @if (Model.IsCurrentUserRegistered)
+                        {
+                            <button type="submit" class="btn btn-warning">
+                                Odjavi se s termina
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="submit" class="btn btn-success">
+                                Prijavi se na termin
+                            </button>
+                        }
+                    </form>
+                }
+                else
+                {
+                    <div class="alert alert-info mb-0">
+                        Za prijavu na termin moraš biti prijavljen.
+                    </div>
                 }
             </div>
 
-            <div>
-                <h4 class="mb-2">Tamni:</h4>
-                @foreach (var p in Model.DarkTeam)
-                {
-                    <div class="border rounded py-1 my-1 px-3">@p.PlayerName</div>
-                }
+            <div class="row">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <h5 class="text-center mb-3">Popis prijavljenih</h5>
+
+                    <div class="list-group">
+                        @for (int i = 0; i < Model.Registrations.Count; i++)
+                        {
+                            var reg = Model.Registrations[i];
+                            var pozicija = i + 1;
+
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>@pozicija.</strong> @reg.PlayerName
+                                </div>
+
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <form method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="registrationId" value="@reg.RegistrationId" />
+
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <button type="submit"
+                                                    formaction="@Url.Action("Delete", "Term")"
+                                                    class="btn btn-outline-danger">
+                                                Obriši
+                                            </button>
+                                            <button type="submit"
+                                                    formaction='@Url.Action("ChangeTeam", "Term", new { team = "Bijeli" })'
+                                                    class="btn btn-outline-secondary">
+                                                Bijeli
+                                            </button>
+                                            <button type="submit"
+                                                    formaction='@Url.Action("ChangeTeam", "Term", new { team = "Tamni" })'
+                                                    class="btn btn-dark text-white">
+                                                Tamni
+                                            </button>
+                                        </div>
+                                    </form>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <h5 class="text-center mb-3">Timovi</h5>
+
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h6 class="mb-2">Bijeli</h6>
+                            @foreach (var p in Model.WhiteTeam)
+                            {
+                                <div class="border rounded py-1 my-1 px-2">
+                                    @p.PlayerName
+                                </div>
+                            }
+                        </div>
+                        <div class="col-6">
+                            <h6 class="mb-2">Tamni</h6>
+                            @foreach (var p in Model.DarkTeam)
+                            {
+                                <div class="border rounded py-1 my-1 px-2">
+                                    @p.PlayerName
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
             </div>
+
         </div>
     </div>
 </div>
+
 

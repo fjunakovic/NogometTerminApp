@@ -25,8 +25,6 @@ namespace NogometTerminApp.Controllers
             _context = context;
         }
 
-        // ====== DTO KLASE ======
-
         public class ChangePasswordDto
         {
             public string NewPassword { get; set; }
@@ -44,9 +42,6 @@ namespace NogometTerminApp.Controllers
             public string Result { get; set; }
         }
 
-        // ====== KORISNICI I ROLE ======
-
-        // GET: api/admin/users
         [HttpGet("users")]
         public async Task<IActionResult> GetUsers()
         {
@@ -62,7 +57,6 @@ namespace NogometTerminApp.Controllers
             return Ok(users);
         }
 
-        // POST: api/admin/users/{id}/toggle-admin
         [HttpPost("users/{id}/toggle-admin")]
         public async Task<IActionResult> ToggleAdmin(string id)
         {
@@ -81,7 +75,6 @@ namespace NogometTerminApp.Controllers
             }
         }
 
-        // DELETE: api/admin/users/{id}
         [HttpDelete("users/{id}")]
         public async Task<IActionResult> DeleteUser(string id)
         {
@@ -95,8 +88,6 @@ namespace NogometTerminApp.Controllers
             return NoContent();
         }
 
-        // POST: api/admin/users/{id}/password
-        // body: { "newPassword": "Lozinka123!" }
         [HttpPost("users/{id}/password")]
         public async Task<IActionResult> ChangePassword(string id, [FromBody] ChangePasswordDto dto)
         {
@@ -115,9 +106,6 @@ namespace NogometTerminApp.Controllers
             return Ok(new { message = "Lozinka promijenjena." });
         }
 
-        // ====== TERMINI ======
-
-        // GET: api/admin/terms
         [HttpGet("terms")]
         public async Task<IActionResult> GetTerms()
         {
@@ -137,8 +125,6 @@ namespace NogometTerminApp.Controllers
             return Ok(terms);
         }
 
-        // POST: api/admin/terms
-        // body: { "termDateTime":"2026-02-16T20:00:00", "location":"Teren", "maxPlayers":14 }
         [HttpPost("terms")]
         public async Task<IActionResult> CreateTerm([FromBody] CreateTermDto dto)
         {
@@ -167,7 +153,6 @@ namespace NogometTerminApp.Controllers
             });
         }
 
-        // DELETE: api/admin/terms/{id}
         [HttpDelete("terms/{id}")]
         public async Task<IActionResult> DeleteTerm(int id)
         {
@@ -184,8 +169,6 @@ namespace NogometTerminApp.Controllers
             return NoContent();
         }
 
-        // PUT: api/admin/terms/{id}/result
-        // body: { "result":"5:3" }
         [HttpPut("terms/{id}/result")]
         public async Task<IActionResult> UpdateResult(int id, [FromBody] UpdateResultDto dto)
         {
