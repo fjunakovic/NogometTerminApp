@@ -21,23 +21,19 @@
     </div>
 }
 
-<form asp-action="Register" method="post">
-    <input type="hidden" asp-for="TermId" />
+@if (User.Identity.IsAuthenticated)
+{
+    <form asp-action="Register" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="TermId" />
 
-    <div class="mb-3">
-        <label asp-for="Name" class="form-label">Ime:</label>
-        <input asp-for="Name" class="form-control" />
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Email" class="form-label">Email:</label>
-        <input asp-for="Email" class="form-control" />
-    </div>
-
-    <button type="submit" class="btn btn-primary">Prijavi se</button>
-</form>
-
-<hr />
+        <button type="submit" class="btn btn-primary">Prijavi se</button>
+    </form>
+}
+else
+{
+    <h3>Za prijavu na termin moraš biti prijavljen.</h3>
+}
 
 <div class="row">
     <div class="col-md-6">

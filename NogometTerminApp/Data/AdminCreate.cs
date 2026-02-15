@@ -13,7 +13,7 @@ namespace NogometTerminApp.Data
             var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
             const string adminRole = "Admin";
-            const string adminEmail = "admin@example.com";   
+            const string adminUserName = "admin";
             const string adminPassword = "Qwe34asd!";        
 
             if (!await roleManager.RoleExistsAsync(adminRole))
@@ -21,13 +21,12 @@ namespace NogometTerminApp.Data
                 await roleManager.CreateAsync(new IdentityRole(adminRole));
             }
 
-            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+            var adminUser = await userManager.FindByNameAsync(adminUserName);
             if (adminUser == null)
             {
                 adminUser = new ApplicationUser
                 {
-                    UserName = adminEmail,    
-                    Email = adminEmail,
+                    UserName = adminUserName,
                     FirstName = "Admin"
                 };
 
@@ -39,4 +38,5 @@ namespace NogometTerminApp.Data
             }
         }
     }
+    
 }

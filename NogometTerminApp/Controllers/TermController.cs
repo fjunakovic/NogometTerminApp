@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NogometTerminApp.Data;
 using NogometTerminApp.Models;
@@ -12,10 +13,12 @@ namespace NogometTerminApp.Controllers
     public class TermController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public TermController(AppDbContext context)
+        public TermController(AppDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         public async Task<IActionResult> Index()
@@ -92,6 +95,12 @@ namespace NogometTerminApp.Controllers
                 ModelState.AddModelError(string.Empty, "Termin je pun (maksimalno 14 igrača).");
             }
 
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "Moraš biti prijavljen da bi se prijavio na termin.");
+            }
+
             if (!ModelState.IsValid)
             {
                 var registrations = term.Registrations
@@ -111,28 +120,32 @@ namespace NogometTerminApp.Controllers
             }
 
             var player = await _context.Players
-                .FirstOrDefaultAsync(p => p.Email == model.Email);
+                .FirstOrDefaultAsync(p => p.UserId == user.Id);
 
             if (player == null)
             {
                 player = new Player
                 {
-                    Name = model.Name,
-                    Email = model.Email
+                    Name = user.FirstName,
+                    UserId = user.Id
                 };
                 _context.Players.Add(player);
                 await _context.SaveChangesAsync();
             }
 
-            var registration = new TermRegistration
+            bool alreadyRegistered = term.Registrations.Any(r => r.PlayerId == player.Id);
+            if (!alreadyRegistered)
             {
-                TermId = term.Id,
-                PlayerId = player.Id,
-                RegisteredAt = DateTime.Now
-            };
+                var registration = new TermRegistration
+                {
+                    TermId = term.Id,
+                    PlayerId = player.Id,
+                    RegisteredAt = DateTime.Now
+                };
 
-            _context.TermRegistrations.Add(registration);
-            await _context.SaveChangesAsync();
+                _context.TermRegistrations.Add(registration);
+                await _context.SaveChangesAsync();
+            }
 
             return RedirectToAction("Index");
         }
