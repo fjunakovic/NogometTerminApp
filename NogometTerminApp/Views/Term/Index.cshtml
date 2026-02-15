@@ -39,27 +39,66 @@
 
 <hr />
 
-<h3>Popis prijavljenih:</h3>
+<div class="row">
+    <div class="col-md-6">
+        <h3 class="text-center">Popis prijavljenih:</h3>
 
-<form asp-action="Delete" method="post">
-    @Html.AntiForgeryToken()
-    <ol>
-        @for (int i = 0; i < Model.Registrations.Count; i++)
-        {
-            var reg = Model.Registrations[i];
-            var pozicija = i + 1;
+        <ul>
+            @for (int i = 0; i < Model.Registrations.Count; i++)
+            {
+                var reg = Model.Registrations[i];
+                var pozicija = i + 1;
 
-            <li class="d-flex align-items-center mb-1">
-                <button type="submit"
-                        name="registrationId"
-                        value="@reg.RegistrationId"
-                        class="btn btn-sm btn-danger me-2">
-                    Obriši
-                </button>
+                <div class="mb-1">
+                    <form method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="registrationId" value="@reg.RegistrationId" />
 
-                <span>@pozicija. @reg.PlayerName</span>
-            </li>
-        }
-    </ol>
-</form>
+                        <button type="submit"
+                                formaction="@Url.Action("Delete", "Term")"
+                                class="btn btn-sm btn-danger me-2">
+                            Obriši
+                        </button>
+
+                        <button type="submit"
+                                formaction='@Url.Action("ChangeTeam", "Term", new { team = "Bijeli" })'
+                                class="btn btn-sm btn-light me-1">
+                            Bijeli
+                        </button>
+
+                        <button type="submit"
+                                formaction='@Url.Action("ChangeTeam", "Term", new { team = "Tamni" })'
+                                class="btn btn-sm btn-dark text-white me-2">
+                            Tamni
+                        </button>
+
+                        <span>@pozicija. @reg.PlayerName</span>
+                    </form>
+                </div>
+            }
+        </ul>
+    </div>
+
+    <div class="col-md-6">
+        <h3 class="text-center">Timovi:</h3>
+
+        <div class="d-flex justify-content-center text-center">
+            <div class="me-4">
+                <h4 class="mb-2">Bijeli:</h4>
+                @foreach (var p in Model.WhiteTeam)
+                {
+                    <div class="border rounded py-1 my-1 px-3">@p.PlayerName</div>
+                }
+            </div>
+
+            <div>
+                <h4 class="mb-2">Tamni:</h4>
+                @foreach (var p in Model.DarkTeam)
+                {
+                    <div class="border rounded py-1 my-1 px-3">@p.PlayerName</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
 

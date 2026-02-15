@@ -45,7 +45,8 @@ namespace NogometTerminApp.Controllers
                 .Select(r => new TermRegistrationInfo
                 {
                     RegistrationId = r.Id,
-                    PlayerName = r.Player.Name
+                    PlayerName = r.Player.Name,
+                    Team = r.Team
                 })
                 .ToList() ?? new List<TermRegistrationInfo>();
 
@@ -194,7 +195,30 @@ namespace NogometTerminApp.Controllers
             _context.Update(term);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index)); // ili "Index" u Statistics
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangeTeam(int registrationId, string team)
+        {
+            var registration = await _context.TermRegistrations
+                .FirstOrDefaultAsync(r => r.Id == registrationId);
+
+            if (registration == null)
+            {
+                return NotFound();
+            }
+
+            if (team != "Bijeli" && team != "Tamni" && !string.IsNullOrEmpty(team))
+            {
+                return BadRequest();
+            }
+
+            registration.Team = string.IsNullOrEmpty(team) ? null : team;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index");
         }
     }
 }

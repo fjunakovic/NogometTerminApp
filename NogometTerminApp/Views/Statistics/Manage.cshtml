@@ -8,7 +8,7 @@
 
 <table class="table table-striped">
     <thead>
-        <tr>
+        <tr class="text-center">
             <th>Datum i vrijeme</th>
             <th>Lokacija</th>
             <th>Prijavljeni</th>
@@ -19,7 +19,7 @@
     <tbody>
         @foreach (var term in Model)
         {
-            <tr>
+            <tr class ="text-center">
                 <td>@term.TermDateTime.ToString("dd.MM.yyyy. HH:mm")</td>
                 <td>@term.Location</td>
                 <td>@term.RegisteredCount</td>
@@ -45,13 +45,6 @@
                        class="btn btn-sm btn-primary">
                         Uredi rezultat
                     </a>
-
-                    <a asp-action="Delete"
-                       asp-controller="Statistics"
-                       asp-route-id="@term.TermId"
-                       class="btn btn-sm btn-danger">
-                        Obriši
-                    </a>
                     @if (!term.IsPostponed)
                     {
                         <form asp-action="Postpone"
@@ -76,6 +69,12 @@
                             </button>
                         </form>
                     }
+                    <a asp-action="Delete"
+                       asp-controller="Statistics"
+                       asp-route-id="@term.TermId"
+                       class="btn btn-sm btn-danger">
+                        Obriši
+                    </a>
                 </td>
             </tr>
         }
