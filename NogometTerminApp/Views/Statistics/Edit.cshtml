@@ -4,25 +4,43 @@
     ViewData["Title"] = "Uredi rezultat";
 }
 
-<h1>Uredi rezultat</h1>
-
-<form asp-action="Edit" method="post">
-
-    <input type="hidden" asp-for="TermId" />
-
-    <div class="mb-3">
-        <label class="form-label">Termin</label>
-        <input class="form-control"
-               value="@Model.TermDateTime.ToString("dd.MM.yyyy. HH:mm") - @Model.Location"
-               disabled />
+<div class="card shadow-sm card-termin mt-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Uredi rezultat termina</h5>
+        <a asp-action="Manage" class="btn btn-sm btn-outline-light text-primary bg-white">
+            Natrag na upravljanje
+        </a>
     </div>
 
-    <div class="mb-3">
-        <label class="form-label">Rezultat</label>
-        <input asp-for="Result" class="form-control" />
-        <span asp-validation-for="Result" class="text-danger"></span>
-    </div>
+    <div class="card-body">
+        <form asp-action="Edit" method="post">
+            <input type="hidden" asp-for="TermId" />
 
-    <button type="submit" class="btn btn-primary">Spremi</button>
-    <a asp-action="Manage" class="btn btn-secondary">Natrag</a>
-</form>
+            <div class="mb-3">
+                <label class="form-label">Termin</label>
+                <input class="form-control"
+                       value="@Model.TermDateTime.ToString("dd.MM.yyyy. HH:mm") - @Model.Location"
+                       disabled />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Result" class="form-label">Rezultat (Bijeli : Tamni)</label>
+                <input asp-for="Result" class="form-control" />
+                <span asp-validation-for="Result" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+                <a asp-action="Manage" class="btn btn-secondary">
+                    Odustani
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    Spremi
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

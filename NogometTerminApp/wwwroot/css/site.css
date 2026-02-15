@@ -20,3 +20,23 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.main-bg {
+    background-image: url('../images/Hotanj4.jpg');
+    background-size: cover;
+    background-position: top center;
+    background-repeat: no-repeat;
+    min-height: calc(100vh - 120px);
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+.card-termin {
+    background-color: #ffffff;
+    backdrop-filter: blur(2px);
+}
+
+.container-main {
+    margin-top: 0;
+    padding-top: 0;
+}

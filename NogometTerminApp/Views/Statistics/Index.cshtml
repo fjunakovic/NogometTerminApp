@@ -3,52 +3,70 @@
 @{
     ViewData["Title"] = "Statistika termina";
 }
-<div class="d-flex justify-content-between align-items-center mb-3">
-<h1>Statistika termina</h1>
-    @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
-    {
-        <a asp-action="Manage"
-           asp-controller="Statistics"
-           class="btn btn-primary mb-3">
-            Upravljaj terminima
-        </a>
-    }
-</div>
 
-<table class="table table-striped">
-    <thead>
-        <tr class="text-center">
-            <th>Datum i vrijeme</th>
-            <th>Lokacija</th>
-            <th>Prijavljeni</th>
-            <th>Rezultat (Bijeli:Tamni)</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var term in Model)
-        {
-            <tr class="text-center @(term.IsPostponed ? "bg-danger text-white" : "")">
-                <td>@term.TermDateTime.ToString("dd.MM.yyyy. HH:mm")</td>
-                <td>@term.Location</td>
-                <td>@term.RegisteredCount</td>
-                <td>@term.Result</td>
-                @*<td>@(term.IsPast ? "Održan" : "Nadolazeći")</td>*@
-                <td>
-                    @if (term.IsPostponed)
+<div class="card shadow-sm card-termin mt-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="mb-0">Statistika termina</h5>
+            <small class="text-muted">
+                Pregled odigranih i nadolazećih termina te njihov status.
+            </small>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-primary">
+                Ukupno termina: @Model.Count()
+            </span>
+
+            @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+            {
+                <a asp-action="Manage"
+                   asp-controller="Statistics"
+                   class="btn btn-sm btn-outline-light text-primary bg-white">
+                    Upravljaj terminima
+                </a>
+            }
+        </div>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0">
+                <thead class="table-light">
+                    <tr class="text-center">
+                        <th>Datum i vrijeme</th>
+                        <th>Lokacija</th>
+                        <th>Prijavljeni</th>
+                        <th>Rezultat (Bijeli : Tamni)</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var term in Model)
                     {
-                        @:Odgođen
+                        <tr class="text-center">
+                            <td>@term.TermDateTime.ToString("dd.MM.yyyy. HH:mm")</td>
+                            <td>@term.Location</td>
+                            <td>@term.RegisteredCount</td>
+                            <td>@(string.IsNullOrWhiteSpace(term.Result) ? "-" : term.Result)</td>
+                            <td>
+                                @if (term.IsPostponed)
+                                {
+                                    <span class="badge bg-danger">Odgođen</span>
+                                }
+                                else if (term.IsPast)
+                                {
+                                    <span class="badge bg-success">Održan</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">Nadolazeći</span>
+                                }
+                            </td>
+                        </tr>
                     }
-                    else if (term.IsPast)
-                    {
-                        @:Održan
-                    }
-                    else
-                    {
-                        @:Nadolazeći
-                    }
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

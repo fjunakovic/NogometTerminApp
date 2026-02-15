@@ -41,7 +41,6 @@
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm" role="group">
 
-                                    <!-- TOGGLE ADMIN – odmah šalje formu -->
                                     <form asp-action="ToggleAdmin"
                                           asp-controller="Home"
                                           method="post"
@@ -53,7 +52,6 @@
                                         </button>
                                     </form>
 
-                                    <!-- PROMJENA LOZINKE – vodi na posebnu stranicu s formom -->
                                     <form asp-action="ResetPasswordForm"
                                           asp-controller="Home"
                                           method="get"
@@ -64,7 +62,6 @@
                                         </button>
                                     </form>
 
-                                    <!-- OBRIŠI – server-side bez JS modala (može ostati i ovako, ali bez onsubmit JS-a) -->
                                     <form asp-action="DeleteUser"
                                           asp-controller="Home"
                                           method="post"

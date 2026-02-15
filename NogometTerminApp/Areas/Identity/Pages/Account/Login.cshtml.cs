@@ -83,7 +83,6 @@ namespace NogometTerminApp.Areas.Identity.Pages.Account
 
             if (ModelState.IsValid)
             {
-                // PRIJAVA PREKO KORISNIČKOG IMENA UMJESTO EMAILA
                 var result = await _signInManager.PasswordSignInAsync(
                     Input.UserName,
                     Input.Password,
@@ -93,7 +92,7 @@ namespace NogometTerminApp.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("Korisnik je prijavio.");
-                    return LocalRedirect(returnUrl);
+                    return RedirectToAction("Index", "Term");
                 }
                 if (result.RequiresTwoFactor)
                 {
@@ -111,7 +110,6 @@ namespace NogometTerminApp.Areas.Identity.Pages.Account
                 }
             }
 
-            // If we got this far, something failed, redisplay form
             return Page();
         }
     }

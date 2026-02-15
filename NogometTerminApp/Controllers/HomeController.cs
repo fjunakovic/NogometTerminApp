@@ -35,9 +35,7 @@ namespace NogometTerminApp.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
-        // ------- ADMIN PANEL ZA KORISNIKE -------
 
-        // Lista svih korisnika – samo Admin
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AdminUsers()
         {
@@ -78,7 +76,6 @@ namespace NogometTerminApp.Controllers
             return RedirectToAction(nameof(AdminUsers));
         }
 
-        // Obriši korisnika
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
