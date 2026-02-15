@@ -23,11 +23,18 @@
 
 @if (User.Identity.IsAuthenticated)
 {
-    <form asp-action="Register" method="post">
+    <form asp-action="@(Model.IsCurrentUserRegistered ? "Unregister" : "Register")" method="post">
         @Html.AntiForgeryToken()
         <input type="hidden" asp-for="TermId" />
 
-        <button type="submit" class="btn btn-primary">Prijavi se</button>
+        @if (Model.IsCurrentUserRegistered)
+        {
+            <button type="submit" class="btn btn-warning">Odjavi se</button>
+        }
+        else
+        {
+            <button type="submit" class="btn btn-primary">Prijavi se</button>
+        }
     </form>
 }
 else
@@ -50,23 +57,26 @@ else
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="registrationId" value="@reg.RegistrationId" />
 
-                        <button type="submit"
-                                formaction="@Url.Action("Delete", "Term")"
-                                class="btn btn-sm btn-danger me-2">
-                            Obriši
-                        </button>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <button type="submit"
+                                    formaction="@Url.Action("Delete", "Term")"
+                                    class="btn btn-sm btn-danger me-2">
+                                Obriši
+                            </button>
 
-                        <button type="submit"
-                                formaction='@Url.Action("ChangeTeam", "Term", new { team = "Bijeli" })'
-                                class="btn btn-sm btn-light me-1">
-                            Bijeli
-                        </button>
+                            <button type="submit"
+                                    formaction='@Url.Action("ChangeTeam", "Term", new { team = "Bijeli" })'
+                                    class="btn btn-sm btn-light me-1">
+                                Bijeli
+                            </button>
 
-                        <button type="submit"
-                                formaction='@Url.Action("ChangeTeam", "Term", new { team = "Tamni" })'
-                                class="btn btn-sm btn-dark text-white me-2">
-                            Tamni
-                        </button>
+                            <button type="submit"
+                                    formaction='@Url.Action("ChangeTeam", "Term", new { team = "Tamni" })'
+                                    class="btn btn-sm btn-dark text-white me-2">
+                                Tamni
+                            </button>
+                        }
 
                         <span>@pozicija. @reg.PlayerName</span>
                     </form>

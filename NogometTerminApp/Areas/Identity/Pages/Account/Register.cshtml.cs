@@ -111,6 +111,8 @@ namespace NogometTerminApp.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("Korisnik je kreirao korisnički račun s lozinkom");
 
+                    await _userManager.AddToRoleAsync(user, "User");
+
                     var player = new Player
                     {
                         Name = user.FirstName,

@@ -22,5 +22,7 @@ namespace NogometTerminApp.Models
 
         public IEnumerable<TermRegistrationInfo> NoTeam =>
             Registrations?.Where(r => string.IsNullOrEmpty(r.Team)) ?? new List<TermRegistrationInfo>();
+
+        public bool IsCurrentUserRegistered { get; set; }
     }
 }

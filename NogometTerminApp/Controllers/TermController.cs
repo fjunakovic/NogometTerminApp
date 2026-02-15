@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NogometTerminApp.Data;
 using NogometTerminApp.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace NogometTerminApp.Controllers
 {
@@ -61,6 +62,20 @@ namespace NogometTerminApp.Controllers
                 Registrations = registrations
             };
 
+            if (User.Identity.IsAuthenticated)
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user != null)
+                {
+                    var player = await _context.Players.FirstOrDefaultAsync(p => p.UserId == user.Id);
+                    if (player != null)
+                    {
+                        vm.IsCurrentUserRegistered = term.Registrations
+                            .Any(r => r.PlayerId == player.Id);
+                    }
+                }
+            }
+
             return View(vm);
         }
         public async Task<IActionResult> Edit(int id)
@@ -76,6 +91,7 @@ namespace NogometTerminApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Register(TermRegisterViewModel model)
         {
             var term = await _context.Terms
@@ -150,9 +166,41 @@ namespace NogometTerminApp.Controllers
             return RedirectToAction("Index");
         }
 
-   
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> Unregister(TermRegisterViewModel model)
+        {
+            var term = await _context.Terms
+                .Include(t => t.Registrations)
+                .FirstOrDefaultAsync(t => t.Id == model.TermId);
+
+            if (term == null)
+                return NotFound();
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return Challenge();
+
+            var player = await _context.Players.FirstOrDefaultAsync(p => p.UserId == user.Id);
+            if (player == null)
+                return RedirectToAction("Index");
+
+            var registration = await _context.TermRegistrations
+                .FirstOrDefaultAsync(r => r.TermId == term.Id && r.PlayerId == player.Id);
+
+            if (registration != null)
+            {
+                _context.TermRegistrations.Remove(registration);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int registrationId)
         {
             var registration = await _context.TermRegistrations
@@ -193,6 +241,7 @@ namespace NogometTerminApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, Term term)
         {
             if (id != term.Id)
@@ -213,6 +262,7 @@ namespace NogometTerminApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ChangeTeam(int registrationId, string team)
         {
             var registration = await _context.TermRegistrations

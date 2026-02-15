@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace NogometTerminApp.Data
 {
-    public static class AdminCreate
+    public static class RoleCreate
     {
         public static async Task SeedAsync(IServiceProvider services)
         {
@@ -13,13 +13,15 @@ namespace NogometTerminApp.Data
             var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
             const string adminRole = "Admin";
+            const string userRole = "User";
             const string adminUserName = "admin";
-            const string adminPassword = "Qwe34asd!";        
+            const string adminPassword = "Qwe34asd!";
 
             if (!await roleManager.RoleExistsAsync(adminRole))
-            {
                 await roleManager.CreateAsync(new IdentityRole(adminRole));
-            }
+
+            if (!await roleManager.RoleExistsAsync(userRole))
+                await roleManager.CreateAsync(new IdentityRole(userRole));
 
             var adminUser = await userManager.FindByNameAsync(adminUserName);
             if (adminUser == null)

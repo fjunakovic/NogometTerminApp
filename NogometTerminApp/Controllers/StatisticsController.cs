@@ -1,14 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NogometTerminApp.Data;
 using NogometTerminApp.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace NogometTerminApp.Controllers
 {
+    [Authorize]
     public class StatisticsController : Controller
     {
         private readonly AppDbContext _context;
@@ -18,6 +20,7 @@ namespace NogometTerminApp.Controllers
             _context = context;
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             var now = DateTime.Now;
@@ -42,6 +45,8 @@ namespace NogometTerminApp.Controllers
 
             return View(model);
         }
+
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Manage()
         {
             var now = DateTime.Now;
@@ -65,6 +70,8 @@ namespace NogometTerminApp.Controllers
 
             return View(model);
         }
+
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id)
         {
             var term = await _context.Terms
@@ -92,6 +99,7 @@ namespace NogometTerminApp.Controllers
             return View(vm);
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var term = await _context.Terms
@@ -118,9 +126,9 @@ namespace NogometTerminApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(TermStatisticsViewModel vm)
         {
-            // privremeno ignoriramo ModelState za ovu simple formu
 
             var term = await _context.Terms.FindAsync(vm.TermId);
             if (term == null)
@@ -138,6 +146,7 @@ namespace NogometTerminApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int termId)
         {
             var term = await _context.Terms
@@ -159,6 +168,7 @@ namespace NogometTerminApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Postpone(int id)
         {
             var term = await _context.Terms.FindAsync(id);
@@ -175,6 +185,7 @@ namespace NogometTerminApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UnPostpone(int id)
         {
             var term = await _context.Terms.FindAsync(id);

@@ -5,11 +5,14 @@
 }
 <div class="d-flex justify-content-between align-items-center mb-3">
 <h1>Statistika termina</h1>
-<a asp-action="Manage"
-   asp-controller="Statistics"
-   class="btn btn-primary mb-3">
-    Upravljaj terminima
-</a>
+    @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+    {
+        <a asp-action="Manage"
+           asp-controller="Statistics"
+           class="btn btn-primary mb-3">
+            Upravljaj terminima
+        </a>
+    }
 </div>
 
 <table class="table table-striped">

@@ -13,6 +13,7 @@
             <th>Lokacija</th>
             <th>Prijavljeni</th>
             <th>Rezultat</th>
+            <th>Status</th>
             <th>Akcije</th>
         </tr>
     </thead>
@@ -39,12 +40,16 @@
                     }
                 </td>
                 <td>
-                    <a asp-action="Edit"
-                       asp-controller="Statistics"
-                       asp-route-id="@term.TermId"
-                       class="btn btn-sm btn-primary">
-                        Uredi rezultat
-                    </a>
+                    @if (!term.IsPostponed)
+                    {
+                        <a asp-action="Edit"
+                           asp-controller="Statistics"
+                           asp-route-id="@term.TermId"
+                           class="btn btn-sm btn-primary">
+                            Uredi rezultat
+                        </a>
+                    }
+
                     @if (!term.IsPostponed)
                     {
                         <form asp-action="Postpone"
@@ -69,6 +74,7 @@
                             </button>
                         </form>
                     }
+
                     <a asp-action="Delete"
                        asp-controller="Statistics"
                        asp-route-id="@term.TermId"
