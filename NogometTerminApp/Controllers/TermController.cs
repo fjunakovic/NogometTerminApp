@@ -22,28 +22,8 @@ namespace NogometTerminApp.Controllers
             _userManager = userManager;
         }
 
-        public async Task<IActionResult> Index()
+        private async Task<TermRegisterViewModel> BuildTermViewModel(Term term)
         {
-            var termDateTime = GetCurrentSaturday20();
-
-            var term = await _context.Terms
-                .Include(t => t.Registrations)
-                .ThenInclude(r => r.Player)
-                .FirstOrDefaultAsync(t => t.TermDateTime == termDateTime);
-
-            if (term == null)
-            {
-                term = new Term
-                {
-                    TermDateTime = termDateTime,
-                    Location = "Zagreb - ŠD Hotanj",
-                    MaxPlayers = 14
-                };
-
-                _context.Terms.Add(term);
-                await _context.SaveChangesAsync();
-            }
-
             var registrations = term.Registrations?
                 .OrderBy(r => r.RegisteredAt)
                 .Select(r => new TermRegistrationInfo
@@ -67,7 +47,8 @@ namespace NogometTerminApp.Controllers
                 var user = await _userManager.GetUserAsync(User);
                 if (user != null)
                 {
-                    var player = await _context.Players.FirstOrDefaultAsync(p => p.UserId == user.Id);
+                    var player = await _context.Players
+                        .FirstOrDefaultAsync(p => p.UserId == user.Id);
                     if (player != null)
                     {
                         vm.IsCurrentUserRegistered = term.Registrations
@@ -76,8 +57,34 @@ namespace NogometTerminApp.Controllers
                 }
             }
 
+            return vm;
+        }
+        public async Task<IActionResult> Index()
+        {
+            var termDateTime = GetCurrentSaturday20();
+
+            var term = await _context.Terms
+                .Include(t => t.Registrations)
+                .ThenInclude(r => r.Player)
+                .FirstOrDefaultAsync(t => t.TermDateTime == termDateTime);
+
+            if (term == null)
+            {
+                term = new Term
+                {
+                    TermDateTime = termDateTime,
+                    Location = "Zagreb - ŠD Hotanj",
+                    MaxPlayers = 14
+                };
+
+                _context.Terms.Add(term);
+                await _context.SaveChangesAsync();
+            }
+
+            var vm = await BuildTermViewModel(term);
             return View(vm);
         }
+
         public async Task<IActionResult> Edit(int id)
         {
             var term = await _context.Terms.FindAsync(id);
@@ -119,20 +126,8 @@ namespace NogometTerminApp.Controllers
 
             if (!ModelState.IsValid)
             {
-                var registrations = term.Registrations
-                    .OrderBy(r => r.RegisteredAt)
-                    .Select(r => new TermRegistrationInfo
-                    {
-                        RegistrationId = r.Id,
-                        PlayerName = r.Player.Name
-                    })
-                    .ToList();
-
-                model.CurrentCount = registrations.Count;
-                model.MaxPlayers = term.MaxPlayers;
-                model.Registrations = registrations;
-
-                return View("Index", model);
+                var vm = await BuildTermViewModel(term);
+                return View("Index", vm);
             }
 
             var player = await _context.Players
